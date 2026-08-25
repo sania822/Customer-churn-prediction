@@ -2,7 +2,7 @@
 
 Predicts which telecom customers are about to cancel their subscription — and explains **why** using SHAP, so the output is something a retention team can actually act on, not just a black-box score.
 
-**[🔗 Live Dashboard](#)** *(replace with your Streamlit Cloud link once deployed)*
+**[🔗 Live Dashboard](https://customer-churn-prediction-2k4zmbpezkgtwx7czuhxxg.streamlit.app/)**
 
 ---
 
