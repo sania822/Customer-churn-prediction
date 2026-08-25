@@ -55,11 +55,6 @@ Of 95 real churners in the holdout set, the model correctly flags 75 — at 88% 
 
 An interactive Streamlit app: enter a customer's profile (plan type, usage minutes, service calls), get a live churn risk score, and see a SHAP breakdown of exactly which factors pushed that score up or down.
 
-<p align="center">
-  <img src="dashboard_screenshot.png" width="700" alt="Dashboard screenshot">
-</p>
-
-*(swap in a real screenshot once you run it locally)*
 
 ## Project Structure
 
