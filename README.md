@@ -1,150 +1,97 @@
-#  Customer Churn Prediction
+# 📉 Customer Churn Prediction + Explainability Dashboard
 
-##  Overview
+Predicts which telecom customers are about to cancel their subscription — and explains **why** using SHAP, so the output is something a retention team can actually act on, not just a black-box score.
 
-This project focuses on predicting customer churn using machine learning techniques. The goal is to identify customers who are likely to leave, enabling businesses to take proactive retention strategies.
-
----
-
-##  Objectives
-
-* Analyze customer behavior and churn patterns
-* Build a classification model to predict churn
-* Improve model performance using hyperparameter tuning
-* Translate results into actionable business insights
+**[🔗 Live Dashboard](#)** *(replace with your Streamlit Cloud link once deployed)*
 
 ---
 
-## Dataset
+## Table of Contents
 
-The dataset includes customer-related features such as:
-
-* Demographics
-* Account information
-* Service usage patterns
-* Target variable: **Churn (0 = No, 1 = Yes)**
-
----
-
-##  Exploratory Data Analysis (EDA)
-
-* Identified class imbalance in churn data
-* Observed key patterns between customer usage and churn
-* Analyzed feature relationships influencing churn
+- [Business Problem](#business-problem)
+- [Results](#results)
+- [How It Works](#how-it-works)
+- [Dashboard](#dashboard)
+- [Project Structure](#project-structure)
+- [Running It Locally](#running-it-locally)
+- [What I'd Do Next](#what-id-do-next)
 
 ---
 
-##  Data Preprocessing & Feature Engineering
+## Business Problem
 
-* Handled missing values
-* Encoded categorical variables
-* Scaled numerical features where required
-* Prepared dataset for classification models
+Customer churn is direct, avoidable revenue loss. Catching at-risk customers early lets a business step in — a retention offer, proactive support — before they leave. A missed churner costs far more than a false alarm, so this model is tuned and evaluated on **recall** for the churn class, not raw accuracy (which is a misleading metric here: simply predicting "no churn" for everyone would already score ~85%).
 
----
+**Data:** [Telecom Churn Dataset](https://www.kaggle.com/datasets/mnassrib/telecom-churn-datasets) (Kaggle) — 3,333 customers, ~14.5% churn rate, pre-split into an 80% training set and a 20% holdout that stays untouched until final evaluation.
 
-##  Model Building
+## Results
 
-### Models Implemented:
+Evaluated on the holdout test set (667 customers the model never saw during training or tuning):
 
-* Logistic Regression
-* Random Forest Classifier
-* Random Forest with **GridSearchCV (Hyperparameter Tuning)** 
+| Metric | Score |
+|---|---|
+| **Recall** (churn) | 79% |
+| **Precision** (churn) | 88% |
+| **ROC-AUC** | 0.92 |
 
----
+Of 95 real churners in the holdout set, the model correctly flags 75 — at 88% precision, meaning a retention team acting on these alerts spends most of its outreach on customers who were genuinely at risk.
 
-##  Model Performance
+**Top churn drivers** (Random Forest feature importance): total day minutes, frequency of customer service calls, and holding an international plan.
 
-###  Logistic Regression
+<p align="center">
+  <img src="plot_confusion_matrix.png" width="420" alt="Confusion matrix on holdout test set">
+  <img src="plot_feature_importance.png" width="420" alt="Top 10 feature importances">
+</p>
 
-* Accuracy: **75%**
-* Recall (Churn class): **67%**
-* F1 Score: **0.44**
+## How It Works
 
-Good baseline model but struggled with balanced performance.
+1. **Clean & de-leak the data** — dropped `State`/`Area code` (no real signal), `Account length` (~0 correlation with churn), and the four `*charge` columns (near-perfectly collinear with the matching `*minutes` columns — keeping both is redundant, borderline leakage).
+2. **Baseline** — Logistic Regression through a `ColumnTransformer` (scaling + one-hot encoding).
+3. **Model** — Random Forest, tuned via `GridSearchCV` (5-fold CV, scored on recall).
+4. **Honest evaluation** — final numbers reported on the untouched `churn-bigml-20` holdout, not the split the model was tuned on.
+5. **Explainability** — SHAP `TreeExplainer` on the tuned Random Forest, surfaced per-customer in the dashboard below.
 
----
+## Dashboard
 
-###  Random Forest
+An interactive Streamlit app: enter a customer's profile (plan type, usage minutes, service calls), get a live churn risk score, and see a SHAP breakdown of exactly which factors pushed that score up or down.
 
-* Accuracy: **94%**
-* Precision (Churn class): **98%**
-* Recall (Churn class): **58%**
-* F1 Score: **0.73**
+<p align="center">
+  <img src="dashboard_screenshot.png" width="700" alt="Dashboard screenshot">
+</p>
 
- High accuracy but lower recall for churn customers.
+*(swap in a real screenshot once you run it locally)*
 
----
+## Project Structure
 
-### 🔹 Tuned Random Forest (GridSearchCV) 
-
-* Accuracy: **96%**
-* Precision (Churn class): **97%**
-* Recall (Churn class): **73%**
-* F1 Score: **0.83**
-
- Best-performing model with balanced precision and recall.
-
----
-
-##  Key Insights
-
-* Class imbalance significantly affects churn prediction
-* Recall is critical for identifying churn customers
-* Hyperparameter tuning improved model generalization
-
----
-
-##  Business Impact
-
-* Helps identify customers at risk of leaving
-* Enables targeted retention campaigns
-* Improves customer lifetime value
-
----
-
-##  Deployment (if applicable)
-
-The model can be deployed using a web application to provide real-time churn predictions.
-
----
-
-##  Project Structure
-
-```id="9xgq4m"
-churn_project/
-│── notebook.ipynb
-│── model.pkl
-│── app.py (optional)
-│── README.md
+```
+.
+├── Customer_Churn_Prediction.ipynb   # EDA, cleaning, baseline, tuned RF, holdout eval
+├── dashboard.py                      # Streamlit app: risk score + SHAP explanation
+├── model.pkl                         # trained pipeline (preprocessor + tuned RF)
+├── requirements.txt
+└── README.md
 ```
 
----
+## Running It Locally
 
-##  Technologies Used
+```bash
+git clone https://github.com/<your-username>/<your-repo>.git
+cd <your-repo>
+pip install -r requirements.txt
 
-* Python
-* Pandas, NumPy
-* Scikit-learn
-* Matplotlib / Seaborn
+# retrain / regenerate model.pkl (optional — it's already included)
+jupyter notebook Customer_Churn_Prediction.ipynb
 
----
+# launch the dashboard
+streamlit run dashboard.py
+```
 
-##  Key Learnings
+## What I'd Do Next
 
-* Importance of handling imbalanced datasets
-* Trade-off between precision and recall
-* Role of hyperparameter tuning in improving performance
-* Evaluating models beyond accuracy
-
----
-
-##  Author
-
-Sania
+- **Cost-sensitive thresholding** — weigh false negatives against the actual cost of a retention offer instead of using the default 0.5 cutoff, to pick the threshold that maximizes expected business value.
+- **A/B test retention offers** against the model's risk tiers to measure real revenue impact, not just recall.
+- **Richer features** — this dataset has no tenure or contract-type fields, both known strong churn signals in telecom; would add if a fuller dataset became available.
 
 ---
 
-## ⭐ Conclusion
-
-This project demonstrates how machine learning can be effectively used to predict customer churn and support data-driven retention strategies, with improved performance achieved through model tuning.
+*Built with scikit-learn, SHAP, and Streamlit.*
