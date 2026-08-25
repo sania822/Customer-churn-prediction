@@ -38,10 +38,6 @@ Of 95 real churners in the holdout set, the model correctly flags 75 — at 88% 
 
 **Top churn drivers** (Random Forest feature importance): total day minutes, frequency of customer service calls, and holding an international plan.
 
-<p align="center">
-  <img src="plot_confusion_matrix.png" width="420" alt="Confusion matrix on holdout test set">
-  <img src="plot_feature_importance.png" width="420" alt="Top 10 feature importances">
-</p>
 
 ## How It Works
 
